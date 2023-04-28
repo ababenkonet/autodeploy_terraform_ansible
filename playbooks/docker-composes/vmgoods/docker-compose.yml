@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+  postgres:
+    restart: always
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DATABASE_LOGIN}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-password}
+      POSTGRES_DB: ${DATABASE_NAME:-goods}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U ${DATABASE_LOGIN}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  goods:
+    restart: always
+    image: alexbabenkodunice/goods:latest
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_NAME: ${DATABASE_NAME:-postgres}
+      DATABASE_LOGIN: ${DATABASE_LOGIN:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-password}
+      POSTS_API: ${POSTS_API:-posts:3000}
+      RAILS_LOG_TO_STDOUT: "true"
+      PORT: ${PORT:-3001}
+    ports:
+      - "${PORT}:${PORT}"
+    command: >
+      bash -c "rails db:migrate &&
+      rails db:seed &&
+      rails s -b 0.0.0.0 -p ${PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

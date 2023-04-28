@@ -1,0 +1,11 @@
+- name: Deploy docker-compose files to multiple hosts
+  hosts: all
+  become: true
+  become_user: "{{ ansible_user }}"
+  tasks:
+    - name: Copy all files from ./docker-composes/name-of-host
+      copy:
+        src: "./docker-composes/{{ inventory_hostname }}/"
+        dest: "/home/{{ ansible_user }}/"
+      tags:
+        - deploy

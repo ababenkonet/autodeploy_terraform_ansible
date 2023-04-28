@@ -1,0 +1,22 @@
+- name: Установка и запуск Docker Compose плагина для питона
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Проверка наличия Python 3 и pip
+      raw: test -e /usr/bin/python3 && test -e /usr/bin/pip3 || (apt -y update && apt install -y python3-pip)
+      
+    - name: Установка Docker Compose
+      shell: test -e /usr/local/bin/docker-compose || (pip3 install docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose)
+      
+    - name: Проверка наличия файла docker-compose.yml
+      stat:
+        path: "/home/{{ ansible_user }}/docker-compose.yml"
+      register: compose_file
+
+    - name: Запуск Docker Compose
+      docker_compose:
+        project_src: "/home/{{ ansible_user }}/"
+        state: present
+      when: compose_file.stat.exists
+

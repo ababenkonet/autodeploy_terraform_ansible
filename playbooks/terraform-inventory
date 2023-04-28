@@ -1,0 +1,15 @@
+[all]
+vmnginx ansible_host="158.160.35.0"
+vmposts ansible_host="10.5.0.17" ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -q ubuntu@158.160.35.0"'
+vmgoods ansible_host="10.5.0.34" ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -q ubuntu@158.160.35.0"'
+
+
+[all:vars]
+ansible_user=ubuntu
+
+[private]
+vmposts
+vmgoods
+
+[public]
+vmnginx
